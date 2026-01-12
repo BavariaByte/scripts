@@ -1,4 +1,3 @@
-````markdown
 # Script One-Liner (Copy & Paste)
 
 Scripts direkt aus GitHub ausführen, ohne Download und `chmod`.
@@ -33,7 +32,4 @@ curl -fsSL "https://raw.githubusercontent.com/<USER>/<REPO>/<REF>/scripts/<scrip
 
 ```bash
 curl -fsSL "https://raw.githubusercontent.com/<USER>/<REPO>/<REF>/scripts/<script>.sh" | sudo VAR1=value1 VAR2=value2 bash
-```
-
-```
 ```
