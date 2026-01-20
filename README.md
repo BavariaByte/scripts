@@ -1,4 +1,3 @@
-````md
 # BavariaByte Scripts Repository
 
 Sammel-Repo für verschiedene Admin, Setup und Automation Scripts.  
