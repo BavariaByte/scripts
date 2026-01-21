@@ -26,9 +26,9 @@ STORAGE="${STORAGE:-local-lvm}"
 BRIDGE="${BRIDGE:-vmbr0}"
 DISTRO="${DISTRO:-ubuntu24}"
 
-MEMORY=2048
-CORES=2
-DISK_SIZE="32G"
+MEMORY=1024
+CORES=1
+DISK_SIZE="4G"
 
 # Cloud Image URLs
 declare -A CLOUD_IMAGES=(
@@ -186,6 +186,8 @@ qm create "$VMID" \
     --net0 "virtio,bridge=$BRIDGE,firewall=1" \
     --scsihw virtio-scsi-single \
     --agent enabled=1 \
+    --serial0 socket \
+    --vga serial0 \
     --tags "cloud-init,template"
 
 print_success "VM created"
