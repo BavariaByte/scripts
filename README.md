@@ -91,7 +91,7 @@ curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/mai
 Cloud Init Template auf Proxmox Node erstellen:
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/create-cloud-init-template.sh" | sudo bash -s -- -s local-lvm -d ubuntu24
+curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/create-cloud-init-template.sh" | bash -s -- -s local-lvm -d ubuntu24
 ```
 
 ##### Parameter
@@ -108,13 +108,13 @@ curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/mai
 Ubuntu 24.04 auf local zfs:
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/create-cloud-init-template.sh" | sudo bash -s -- -s local-zfs -d ubuntu24
+curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/create-cloud-init-template.sh" | bash -s -- -s local-zfs -d ubuntu24
 ```
 
 Debian 12 mit custom VMID:
 
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/create-cloud-init-template.sh" | sudo bash -s -- -i 9001 -s local-lvm -d debian12
+curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/create-cloud-init-template.sh" | bash -s -- -i 9001 -s local-lvm -d debian12
 ```
 
 ---
