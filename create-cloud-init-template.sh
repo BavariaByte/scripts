@@ -43,6 +43,12 @@ declare -A DISTRO_NAMES=(
     ["debian12"]="Debian 12 Bookworm"
 )
 
+declare -A TEMPLATE_NAMES=(
+    ["ubuntu24"]="ubuntu-24.04-cloud"
+    ["ubuntu22"]="ubuntu-22.04-cloud"
+    ["debian12"]="debian-12-cloud"
+)
+
 # ============================================
 # Functions
 # ============================================
@@ -128,6 +134,11 @@ fi
 CLOUD_IMAGE_URL="${CLOUD_IMAGES[$DISTRO]}"
 DISTRO_NAME="${DISTRO_NAMES[$DISTRO]}"
 
+# Use OS-specific template name if not overridden by user
+if [[ "$TEMPLATE_NAME" == "cloud-init-template" ]]; then
+    TEMPLATE_NAME="${TEMPLATE_NAMES[$DISTRO]}"
+fi
+
 # ============================================
 # Main Script
 # ============================================
@@ -194,7 +205,8 @@ print_success "VM created"
 
 # Step 4: Import disk
 print_step "Importing disk to $STORAGE..."
-qm importdisk "$VMID" "$IMAGE_FILE" "$STORAGE" --format qcow2
+# Note: LVM-thin only supports raw format, Proxmox will auto-convert
+qm importdisk "$VMID" "$IMAGE_FILE" "$STORAGE"
 print_success "Disk imported"
 
 # Step 5: Attach disk and configure boot
@@ -202,7 +214,7 @@ print_step "Configuring disk and boot order..."
 qm set "$VMID" \
     --scsi0 "$STORAGE:vm-$VMID-disk-0,discard=on,ssd=1" \
     --boot order=scsi0 \
-    --efidisk0 "$STORAGE:1,format=qcow2,efitype=4m,pre-enrolled-keys=1"
+    --efidisk0 "$STORAGE:1,efitype=4m,pre-enrolled-keys=1"
 
 # Resize disk to target size
 qm disk resize "$VMID" scsi0 "$DISK_SIZE"
