@@ -82,6 +82,8 @@ curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/mai
 curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/mount-share.sh" | sudo bash -s -- -i 172.16.10.5 -s projektdaten
 ```
 
+---
+
 ### Kali Setup
 ```bash
 curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/kali-setup.sh" | sudo bash
