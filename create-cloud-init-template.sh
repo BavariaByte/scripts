@@ -251,12 +251,7 @@ print_step "Enabling QEMU Guest Agent..."
 qm set "$VMID" --agent enabled=1
 print_success "QEMU Guest Agent enabled"
 
-# Step 9: Protect template
-print_step "Enabling template protection..."
-qm set "$VMID" --protection 1
-print_success "Template protected from accidental deletion"
-
-# Step 10: Convert to template
+# Step 9: Convert to template
 print_step "Converting VM to template..."
 qm template "$VMID"
 print_success "VM converted to template"
