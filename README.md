@@ -73,6 +73,14 @@ Hier sind die aktuell verfügbaren Scripts nach Kategorien sortiert.
 curl -fsSL "https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/docker-setup.sh" | sudo bash
 ```
 
+```bash
+bash <(wget -qO- https://raw.githubusercontent.com/BavariaByte/scripts/refs/heads/main/docker-setup.sh)
+```
+
+```bash
+bash <(wget -qO- https://get.docker.com)
+```
+
 ---
 
 ### Storage und Shares
