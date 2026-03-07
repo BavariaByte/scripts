@@ -44,9 +44,9 @@ declare -A DISTRO_NAMES=(
 )
 
 declare -A TEMPLATE_NAMES=(
-    ["ubuntu24"]="ubuntu-24.04-cloud"
-    ["ubuntu22"]="ubuntu-22.04-cloud"
-    ["debian12"]="debian-12-cloud"
+    ["ubuntu24"]="ubuntu-24.04-cloud-init"
+    ["ubuntu22"]="ubuntu-22.04-cloud-init"
+    ["debian12"]="debian-12-cloud-init"
 )
 
 # ============================================
@@ -134,7 +134,7 @@ fi
 CLOUD_IMAGE_URL="${CLOUD_IMAGES[$DISTRO]}"
 DISTRO_NAME="${DISTRO_NAMES[$DISTRO]}"
 
-# Use OS-specific template name if not overridden by user
+# Use OS-specific template name if not overriden by user
 if [[ "$TEMPLATE_NAME" == "cloud-init-template" ]]; then
     TEMPLATE_NAME="${TEMPLATE_NAMES[$DISTRO]}"
 fi
@@ -205,14 +205,28 @@ print_success "VM created"
 
 # Step 4: Import disk
 print_step "Importing disk to $STORAGE..."
-# Note: LVM-thin only supports raw format, Proxmox will auto-convert
-qm importdisk "$VMID" "$IMAGE_FILE" "$STORAGE"
+# Note: LVM-thin only supports raw format, Proxmox will auto-convert qcow2 to raw
+IMPORT_OUTPUT=$(qm importdisk "$VMID" "$IMAGE_FILE" "$STORAGE" 2>&1)
+echo "$IMPORT_OUTPUT"
+
+# Extract the imported disk volume name (works for both directory and LVM storage)
+# Directory storage output: "successfully imported disk 'local:9000/vm-9000-disk-0.raw'"
+# LVM storage output: "successfully imported disk 'local-lvm:vm-9000-disk-0'"
+IMPORTED_DISK=$(echo "$IMPORT_OUTPUT" | grep -oP "successfully imported disk '\K[^']+")
+if [[ -z "$IMPORTED_DISK" ]]; then
+    # Fallback: try to find the unused disk via qm config
+    IMPORTED_DISK=$(qm config "$VMID" | grep -oP 'unused0:\s*\K\S+')
+fi
+if [[ -z "$IMPORTED_DISK" ]]; then
+    print_error "Could not determine imported disk name"
+fi
+echo "  Detected disk volume: $IMPORTED_DISK"
 print_success "Disk imported"
 
 # Step 5: Attach disk and configure boot
 print_step "Configuring disk and boot order..."
 qm set "$VMID" \
-    --scsi0 "$STORAGE:vm-$VMID-disk-0,discard=on,ssd=1" \
+    --scsi0 "${IMPORTED_DISK},discard=on,ssd=1" \
     --boot order=scsi0 \
     --efidisk0 "$STORAGE:1,efitype=4m,pre-enrolled-keys=1"
 
