@@ -176,6 +176,9 @@ if command -v virt-customize &>/dev/null; then
     virt-customize -a "$IMAGE_FILE" \
         --install qemu-guest-agent \
         --run-command 'systemctl enable qemu-guest-agent' \
+        --run-command 'echo "ssh_pwauth: true" > /etc/cloud/cloud.cfg.d/99-pwauth.cfg' \
+        --run-command 'sed -i "s/^#\?PasswordAuthentication.*/PasswordAuthentication yes/" /etc/ssh/sshd_config' \
+        --run-command 'find /etc/ssh/sshd_config.d/ -name "*.conf" -exec sed -i "s/^PasswordAuthentication no/PasswordAuthentication yes/" {} + 2>/dev/null || true' \
         2>/dev/null || echo "  Warning: virt-customize failed, skipping package install"
 else
     echo "  Note: libguestfs-tools not installed, skipping package pre-install"
