@@ -201,7 +201,7 @@ qm create "$VMID" \
     --scsihw virtio-scsi-single \
     --agent enabled=1 \
     --serial0 socket \
-    --vga serial0 \
+    --vga virtio \
     --tags "cloud-init,template"
 
 print_success "VM created"
