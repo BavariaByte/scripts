@@ -179,6 +179,7 @@ if command -v virt-customize &>/dev/null; then
         --run-command 'echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/99-force-password-auth.conf' \
         --run-command 'sed -i "s/^PasswordAuthentication no/PasswordAuthentication yes/" /etc/ssh/sshd_config.d/*.conf 2>/dev/null || true' \
         --run-command 'sed -i "s/^#\?PasswordAuthentication.*/PasswordAuthentication yes/" /etc/ssh/sshd_config' \
+        --run-command 'echo "XKBMODEL=\"pc105\"" > /etc/default/keyboard; echo "XKBLAYOUT=\"de\"" >> /etc/default/keyboard; echo "XKBVARIANT=\"\"" >> /etc/default/keyboard; echo "XKBOPTIONS=\"\"" >> /etc/default/keyboard' \
         2>/dev/null || echo "  Warning: virt-customize failed, skipping package install"
 else
     echo "  Note: libguestfs-tools not installed, skipping package pre-install"
@@ -202,6 +203,7 @@ qm create "$VMID" \
     --agent enabled=1 \
     --serial0 socket \
     --vga virtio \
+    --keyboard de \
     --tags "cloud-init,template"
 
 print_success "VM created"
