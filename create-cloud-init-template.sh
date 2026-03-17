@@ -176,9 +176,8 @@ if command -v virt-customize &>/dev/null; then
     virt-customize -a "$IMAGE_FILE" \
         --install qemu-guest-agent \
         --run-command 'systemctl enable qemu-guest-agent' \
-        --run-command 'echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/99-force-password-auth.conf' \
-        --run-command 'sed -i "s/^PasswordAuthentication no/PasswordAuthentication yes/" /etc/ssh/sshd_config.d/*.conf 2>/dev/null || true' \
-        --run-command 'sed -i "s/^#\?PasswordAuthentication.*/PasswordAuthentication yes/" /etc/ssh/sshd_config' \
+        --run-command 'rm -f /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/60-cloudimg-settings.conf 2>/dev/null || true' \
+        --run-command 'sed -i "s/^PasswordAuthentication no/#PasswordAuthentication no/" /etc/ssh/sshd_config.d/*.conf 2>/dev/null || true' \
         --run-command 'echo "XKBMODEL=\"pc105\"" > /etc/default/keyboard; echo "XKBLAYOUT=\"de\"" >> /etc/default/keyboard; echo "XKBVARIANT=\"\"" >> /etc/default/keyboard; echo "XKBOPTIONS=\"\"" >> /etc/default/keyboard' \
         2>/dev/null || echo "  Warning: virt-customize failed, skipping package install"
 else
