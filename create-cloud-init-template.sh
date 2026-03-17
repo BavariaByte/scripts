@@ -181,6 +181,10 @@ ssh_pwauth: true
 chpasswd: { expire: False }
 keyboard:
   layout: de
+runcmd:
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, --now, qemu-guest-agent ]
+  - [ systemctl, start, qemu-guest-agent ]
 EOF' \
         --run-command 'dpkg-reconfigure -f noninteractive keyboard-configuration || true' \
         --run-command 'rm -f /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/60-cloudimg-settings.conf 2>/dev/null || true' \
