@@ -170,13 +170,32 @@ else
 fi
 print_success "Cloud image ready"
 
-# Step 2: Install qemu-guest-agent into the image
-print_step "Installing qemu-guest-agent into image..."
-if command -v virt-customize &>/dev/null; then
-    virt-customize -a "$IMAGE_FILE" \
-        --install qemu-guest-agent \
-        --run-command 'systemctl enable qemu-guest-agent' \
-        --run-command 'cat << EOF > /etc/cloud/cloud.cfg.d/99-custom.cfg
+print_step "Installing qemu-guest-agent and configuring image..."
+if ! command -v virt-customize &>/dev/null; then
+    print_error "virt-customize is not installed! Run 'apt update && apt install -y libguestfs-tools' on the Proxmox host first."
+fi
+
+# Ensure virt-customize works reliably on Proxmox by disabling libvirt backend
+export LIBGUESTFS_BACKEND=direct
+
+print_step "Running virt-customize (this might take a few minutes)..."
+virt-customize -a "$IMAGE_FILE" \
+    --update \
+    --install qemu-guest-agent \
+    --run-command 'systemctl enable qemu-guest-agent' \
+    --run-command 'rm -f /etc/ssh/sshd_config.d/60-cloudimg-settings.conf 2>/dev/null || true' \
+    --run-command 'rm -f /etc/ssh/sshd_config.d/50-cloud-init.conf 2>/dev/null || true' \
+    --run-command 'echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/99-pve.conf' \
+    --run-command 'sed -i "s/#PasswordAuthentication yes/PasswordAuthentication yes/" /etc/ssh/sshd_config 2>/dev/null || true' \
+    --run-command 'sed -i "s/PasswordAuthentication no/#PasswordAuthentication no/" /etc/ssh/sshd_config 2>/dev/null || true' \
+    --run-command 'echo "XKBMODEL=\"pc105\"" > /etc/default/keyboard' \
+    --run-command 'echo "XKBLAYOUT=\"de\"" >> /etc/default/keyboard' \
+    --run-command 'echo "XKBVARIANT=\"\"" >> /etc/default/keyboard' \
+    --run-command 'echo "XKBOPTIONS=\"\"" >> /etc/default/keyboard' \
+    --run-command 'dpkg-reconfigure -f noninteractive keyboard-configuration 2>/dev/null || true' \
+    --run-command 'mkdir -p /etc/cloud/cloud.cfg.d' \
+    --run-command 'cat << EOF > /etc/cloud/cloud.cfg.d/99-pve.cfg
+datasource_list: [ NoCloud, ConfigDrive ]
 ssh_pwauth: true
 chpasswd: { expire: False }
 keyboard:
@@ -184,17 +203,8 @@ keyboard:
 runcmd:
   - [ systemctl, daemon-reload ]
   - [ systemctl, enable, --now, qemu-guest-agent ]
-  - [ systemctl, start, qemu-guest-agent ]
-EOF' \
-        --run-command 'dpkg-reconfigure -f noninteractive keyboard-configuration || true' \
-        --run-command 'rm -f /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/60-cloudimg-settings.conf 2>/dev/null || true' \
-        --run-command 'sed -i "s/^PasswordAuthentication no/#PasswordAuthentication no/" /etc/ssh/sshd_config.d/*.conf 2>/dev/null || true' \
-        --run-command 'echo "XKBMODEL=\"pc105\"" > /etc/default/keyboard; echo "XKBLAYOUT=\"de\"" >> /etc/default/keyboard; echo "XKBVARIANT=\"\"" >> /etc/default/keyboard; echo "XKBOPTIONS=\"\"" >> /etc/default/keyboard' \
-        2>/dev/null || echo "  Warning: virt-customize failed, skipping package install"
-else
-    echo "  Note: libguestfs-tools not installed, skipping package pre-install"
-    echo "  Install with: apt install libguestfs-tools"
-fi
+EOF'
+
 print_success "Image customization complete"
 
 # Step 3: Create the VM
