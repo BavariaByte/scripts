@@ -176,6 +176,13 @@ if command -v virt-customize &>/dev/null; then
     virt-customize -a "$IMAGE_FILE" \
         --install qemu-guest-agent \
         --run-command 'systemctl enable qemu-guest-agent' \
+        --run-command 'cat << EOF > /etc/cloud/cloud.cfg.d/99-custom.cfg
+ssh_pwauth: true
+chpasswd: { expire: False }
+keyboard:
+  layout: de
+EOF' \
+        --run-command 'dpkg-reconfigure -f noninteractive keyboard-configuration || true' \
         --run-command 'rm -f /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/60-cloudimg-settings.conf 2>/dev/null || true' \
         --run-command 'sed -i "s/^PasswordAuthentication no/#PasswordAuthentication no/" /etc/ssh/sshd_config.d/*.conf 2>/dev/null || true' \
         --run-command 'echo "XKBMODEL=\"pc105\"" > /etc/default/keyboard; echo "XKBLAYOUT=\"de\"" >> /etc/default/keyboard; echo "XKBVARIANT=\"\"" >> /etc/default/keyboard; echo "XKBOPTIONS=\"\"" >> /etc/default/keyboard' \
